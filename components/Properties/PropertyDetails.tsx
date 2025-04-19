@@ -11,11 +11,11 @@ type PropertyDetailsProps = {
 const PropertyDetails = ({details:{bedrooms,baths,guests,beds}}:PropertyDetailsProps) => {
 
   return (
-    <p className="text-md font-light">
+    <p className="text-lg font-light">
         <span>{formatQuantity(bedrooms,'bedroom')} &middot;</span>
         <span>{formatQuantity(baths,'bath')} &middot;</span>
         <span>{formatQuantity(guests,'guest')} &middot;</span>
-        <span>{formatQuantity(beds,'bed')} &middot;</span>
+        <span>{formatQuantity(beds,'bed')} </span>
     </p>
   )
 }
