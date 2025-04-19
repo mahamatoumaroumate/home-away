@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { imageSchema, profileSchema, propertySchema, validateWithZodSchema } from "./schemas"
 import { revalidatePath } from "next/cache"
 import { deleteFileFromS3, uploadFileToS3 } from "./neon"
+import { clerkClient } from "@clerk/clerk-sdk-node"
 
 
 const getAuthUser=async()=>{
@@ -193,3 +194,29 @@ export const fetchPropertyDetails=(id:string)=>{
         },
     })
 }
+
+export const createProfileAction = async (prevState: any, formData: FormData) => {
+    try {
+      const user = await currentUser();
+      if (!user) throw new Error("Please login to create a profile");
+      const rawData = Object.fromEntries(formData);
+      const validatedFields = profileSchema.parse(rawData);
+      await prisma.profile.create({
+        data: {
+          clerkId: user.id,
+          email: user.emailAddresses[0].emailAddress,
+          profileImage: user.imageUrl ?? "",
+          ...validatedFields,
+        },
+      });
+  await clerkClient.users.updateUserMetadata(user.id,{
+    privateMetadata:{
+      hasProfile:true
+    }
+  })
+    } catch (error) {
+      console.error(error);
+      return { message: error instanceof Error ? error.message : "An error occurred" };
+    }
+    redirect('/')
+  };

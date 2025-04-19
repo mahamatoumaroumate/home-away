@@ -1,39 +1,12 @@
-'use server'
+import SubmitButton from "@/components/Form/Buttons"
+import FormContainer from "@/components/Form/FormContainer"
+import FormInput from "@/components/Form/FormInput"
+import { createProfileAction } from "@/utils/actions"
+import { currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
-import SubmitButton from "@/components/Form/Buttons";
-import FormContainer from "@/components/Form/FormContainer";
-import FormInput from "@/components/Form/FormInput";
-import { profileSchema } from "@/utils/schemas";
-import  prisma  from "@/utils/db";
-import {  currentUser } from "@clerk/nextjs/server";
-import { clerkClient } from "@clerk/clerk-sdk-node";
-import { redirect } from "next/navigation";
 
-export const createProfileAction = async (prevState: any, formData: FormData) => {
-  try {
-    const user = await currentUser();
-    if (!user) throw new Error("Please login to create a profile");
-    const rawData = Object.fromEntries(formData);
-    const validatedFields = profileSchema.parse(rawData);
-    await prisma.profile.create({
-      data: {
-        clerkId: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        profileImage: user.imageUrl ?? "",
-        ...validatedFields,
-      },
-    });
-await clerkClient.users.updateUserMetadata(user.id,{
-  privateMetadata:{
-    hasProfile:true
-  }
-})
-  } catch (error) {
-    console.error(error);
-    return { message: error instanceof Error ? error.message : "An error occurred" };
-  }
-  redirect('/')
-};
+
 
 const CreateProfile = async() => {
   const user=await currentUser()
